@@ -9,31 +9,33 @@ using std::endl;
 using std::string;
 using std::vector;
 
-void printProcessedFile(string fileName) {
-    std::ifstream infile(fileName);
+int convert_char_to_int(const char &c) { return int(c) - int('0'); }
 
-    string line;
-    while (std::getline(infile, line)) {
-        std::cout << line << std::endl;
-    }
-}
-
-vector<int> get_digits(string line) {
-    vector<int> result;
+int get_calibration_value(const string &line) {
+    vector<int> digits;
     for (auto &c : line) {
         if (std::isdigit(c)) {
-            result.push_back(int(c) - int('0'));
+            digits.push_back(convert_char_to_int(c));
         }
     }
-    return result;
+
+    // Construct 2-digit number from first and last digits
+    return 10 * digits[0] + digits[digits.size() - 1];
 }
 
 int main() {
-    vector<int> digits = get_digits("a1b2c3d4e5");
-    for (auto &d : digits) {
-        cout << d;
+    string input_file = "data/day1-input.txt";
+
+    std::ifstream infile(input_file);
+
+    int result = 0;
+
+    string line;
+    while (std::getline(infile, line)) {
+        result += get_calibration_value(line);
     }
-    cout << endl;
-    cout << int('1') - int('0') << endl;
+
+    cout << "result = " << result << endl;
+
     return 0;
 }
