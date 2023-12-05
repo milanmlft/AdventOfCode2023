@@ -12,10 +12,13 @@ using std::vector;
 int convert_char_to_int(const char &c) { return int(c) - int('0'); }
 
 int get_calibration_value(const string &line) {
+int get_calibration_value(string &line) {
     vector<int> digits;
-    for (auto &c : line) {
-        if (std::isdigit(c)) {
-            digits.push_back(convert_char_to_int(c));
+
+    string::iterator it;
+    for (it = line.begin(); it < line.end(); it++) {
+        if (std::isdigit(*it)) {
+            digits.push_back(convert_char_to_int(*it));
         }
     }
 
