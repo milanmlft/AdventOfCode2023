@@ -8,5 +8,6 @@ add_custom_target(run_program
     COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/main"
     DEPENDS main
     COMMENT "Run the built executable"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
