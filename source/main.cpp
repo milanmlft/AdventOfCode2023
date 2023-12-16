@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cctype>
+#include <cstddef>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -47,12 +48,12 @@ void replace_first_string_digit(string &line) {
 }
 
 void replace_last_string_digit(string &line) {
-    std::size_t largest_pos = 0;
+    size_t largest_pos = 0;
     string digit_to_replace;
 
     for (map<string, int>::iterator it = digits_map.begin(); it != digits_map.end(); ++it) {
         string cur_digit = it->first;
-        size_t digit_pos = line.find(cur_digit);
+        size_t digit_pos = line.rfind(cur_digit);
         if (digit_pos > largest_pos && digit_pos < line.length()) {
             largest_pos = digit_pos;
             digit_to_replace = cur_digit;
@@ -101,6 +102,7 @@ int get_calibration_value(string &line) {
 
 int main() {
     string input_file = "data/day1-input.txt";
+    // string input_file = "data/example.txt";
     std::ifstream infile(input_file);
 
     int result = 0;
