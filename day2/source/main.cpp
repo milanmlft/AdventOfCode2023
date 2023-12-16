@@ -36,12 +36,30 @@ struct Game {
     int ID;
     vector<GameSet> sets;
 
-    int max_cubes(const string& color) {
-        vector<int> all_cubes;
+    vector<int> all_cubes(const string& color) {
+        vector<int> out;
         for (auto& set : sets) {
-            all_cubes.push_back(set.n_cubes(color));
+            out.push_back(set.n_cubes(color));
         }
-        return *std::max_element(all_cubes.begin(), all_cubes.end());
+        return out;
+    }
+
+    int max_cubes(const string& color) {
+        vector<int> cubes = all_cubes(color);
+        return *std::max_element(cubes.begin(), cubes.end());
+    }
+
+    int min_cubes_power() {
+        int result = 1;
+        for (auto& c : colors) {
+            // The required number of cubes should be at least the largest number found in a set
+            int min_required_cubes = max_cubes(c);
+            // Only consider minimal sets > 0
+            if (min_required_cubes) {
+                result *= min_required_cubes;
+            }
+        }
+        return result;
     }
 };
 
@@ -57,6 +75,7 @@ vector<string> read_inputs(const string& filename) {
     return output;
 }
 
+// From an input line, extract the sets by splitting the line at "; "
 vector<string> get_sets(string line) {
     vector<string> sets;
     string delimiter("; ");
@@ -74,15 +93,15 @@ vector<string> get_sets(string line) {
     return sets;
 }
 
-int find_integer_from_pattern(const string& input, std::regex pattern) {
-    int result = 0;
+// Given a regex pattern containing a capture group, return that capture group as an integer
+int extract_integer_from_pattern(const string& input, std::regex pattern) {
+    int output;
     std::smatch match;
 
     if (std::regex_search(input.begin(), input.end(), match, pattern)) {
-        result = std::stoi(match[1]);
+        output = std::stoi(match[1]);
     }
-
-    return result;
+    return output;
 }
 
 int parse_color(const string& input, string color) {
@@ -92,7 +111,7 @@ int parse_color(const string& input, string color) {
     color.insert(0, "(\\d+)+ ");
     std::regex pattern(color);
 
-    return find_integer_from_pattern(input, pattern);
+    return extract_integer_from_pattern(input, pattern);
 }
 
 GameSet parse_set(const string& input) {
@@ -108,7 +127,7 @@ Game parse_game(const string& line) {
 
     // Get the Game ID
     std::regex pattern("Game ((\\d)+): ");
-    game.ID = find_integer_from_pattern(line, pattern);
+    game.ID = extract_integer_from_pattern(line, pattern);
 
     // Remove the Game ID pattern (Game \\d: ) from the input line
     string new_line = std::regex_replace(line, pattern, "");
@@ -130,7 +149,8 @@ int main() {
     int total_green = 13;
     int total_blue = 14;
 
-    int result = 0;
+    int possible_games_result = 0;
+    int total_minimum_set_power = 0;
 
     for (auto& line : lines) {
         Game game = parse_game(line);
@@ -141,10 +161,13 @@ int main() {
 
         // Check if game is possible
         if (max_red <= total_red && max_green <= total_green && max_blue <= total_blue) {
-            cout << "Game " << game.ID << " is possible" << endl;
-            result += game.ID;
+            possible_games_result += game.ID;
         }
+
+        // Calculate power of minimum set of cubes
+        total_minimum_set_power += game.min_cubes_power();
     }
 
-    cout << "Result: " << result << endl;
+    cout << "Possible games result (Part 1): " << possible_games_result << endl;
+    cout << "Sum of minimum cubes powers: " << total_minimum_set_power << endl;
 }
