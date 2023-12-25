@@ -1,10 +1,11 @@
 #include <algorithm>
 #include <cstddef>
-#include <fstream>
 #include <iostream>
 #include <regex>
 #include <string>
 #include <vector>
+
+#include "read_inputs.hpp"
 
 using std::cout;
 using std::endl;
@@ -62,18 +63,6 @@ struct Game {
         return result;
     }
 };
-
-vector<string> read_inputs(const string& filename) {
-    // Read input file
-    std::ifstream infile(filename);
-    string line;
-    vector<string> output;
-
-    while (std::getline(infile, line)) {
-        output.push_back(line);
-    }
-    return output;
-}
 
 // From an input line, extract the sets by splitting the line at "; "
 vector<string> get_sets(string line) {
