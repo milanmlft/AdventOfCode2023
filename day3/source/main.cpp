@@ -21,12 +21,13 @@ struct SymbolLocation {
     }
 };
 
-vector<SymbolLocation> find_symbol_positions(const vector<string>& lines) {
+vector<SymbolLocation> find_symbol_positions(const vector<string>& lines,
+                                             const string& regex = "[^\\d.]") {
     vector<SymbolLocation> positions;
 
     // Regex set up
     std::smatch symbol_match;
-    std::regex symbol_regex("[^\\d.]");
+    std::regex symbol_regex(regex);
 
     for (int line_number = 0; line_number < lines.size(); line_number++) {
         string line = lines[line_number];
