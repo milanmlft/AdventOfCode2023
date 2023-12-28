@@ -40,37 +40,53 @@ vector<SymbolLocation> find_symbol_positions(const vector<string>& lines) {
     return positions;
 }
 
-vector<int> find_part_numbers(const vector<string>& lines) {
-    vector<int> part_numbers;
-    auto symbol_positions = find_symbol_positions(lines);
+vector<std::smatch> number_matches(const string& line) {
+    vector<std::smatch> matches;
 
     // Regex setup
     std::smatch number_match;
     std::regex number_regex("\\d+");
 
-    // FIXME: UGLY!
+    auto regex_begin = std::sregex_iterator(line.begin(), line.end(), number_regex);
+    auto regex_end = std::sregex_iterator();
+
+    for (std::sregex_iterator reg_it = regex_begin; reg_it != regex_end; ++reg_it) {
+        matches.push_back(*reg_it);
+    }
+    return matches;
+}
+
+bool is_part_number(const std::smatch& match, int line_number,
+                    vector<SymbolLocation>& symbol_positions) {
+    int match_begin = match.position();
+    int match_end = match.position() + match.length() - 1;
+
+    for (auto& symbol_position : symbol_positions) {
+        // Only consider symbols that are between one line above and one below
+        if ((abs(line_number - symbol_position.line) > 1)) {
+            continue;
+        }
+
+        // Should match every combination
+        if (abs(int(match_begin - symbol_position.position)) <= 1 ||
+            abs(int(match_end - symbol_position.position)) <= 1) {
+            return true;
+        }
+    }
+    return false;
+}
+
+vector<int> find_part_numbers(const vector<string>& lines) {
+    vector<int> part_numbers;
+    auto symbol_positions = find_symbol_positions(lines);
+
     for (int line_number = 0; line_number < lines.size(); line_number++) {
         string line = lines[line_number];
-        auto regex_begin = std::sregex_iterator(line.begin(), line.end(), number_regex);
-        auto regex_end = std::sregex_iterator();
+        auto matches = number_matches(line);
 
-        for (std::sregex_iterator reg_it = regex_begin; reg_it != regex_end; ++reg_it) {
-            std::smatch match = *reg_it;
-            int match_begin = match.position();
-            int match_end = match.position() + match.length() - 1;
-
-            for (auto& symbol_position : symbol_positions) {
-                // Only consider symbols that are between one line above and one below
-                if ((abs(line_number - symbol_position.line) > 1)) {
-                    continue;
-                }
-
-                // Should match every combination
-                if (abs(int(match_begin - symbol_position.position)) <= 1 ||
-                    abs(int(match_end - symbol_position.position)) <= 1) {
-                    part_numbers.push_back(std::stoi(match.str()));
-                }
-            }
+        for (auto& match : matches) {
+            if (is_part_number(match, line_number, symbol_positions))
+                part_numbers.push_back(std::stoi(match.str()));
         }
     }
     return part_numbers;
