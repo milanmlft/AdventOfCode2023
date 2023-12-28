@@ -9,5 +9,5 @@ touch ${NEW_DIR}/source/main.cpp
 
 mkdir -p "${NEW_DIR}/data"
 
-cp day1/CMakeLists.txt ${NEW_DIR}/
-cp day1/source/CMakeLists.txt ${NEW_DIR}/source/
+cp day2/CMakeLists.txt ${NEW_DIR}/
+cp day2/source/CMakeLists.txt ${NEW_DIR}/source/
