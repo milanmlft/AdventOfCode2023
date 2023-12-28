@@ -1,3 +1,4 @@
+#include <array>
 #include <iostream>
 #include <regex>
 #include <string>
@@ -92,16 +93,63 @@ vector<int> find_part_numbers(const vector<string>& lines) {
     return part_numbers;
 }
 
+bool is_adjacent(std::smatch number_match, SymbolLocation symbol_position) {
+    int match_begin = number_match.position();
+    int match_end = number_match.position() + number_match.length() - 1;
+
+    // Should match every combination
+    if (abs(int(match_begin - symbol_position.position)) <= 1 ||
+        abs(int(match_end - symbol_position.position)) <= 1) {
+        return true;
+    }
+
+    return false;
+}
+
+vector<int> calculate_gear_ratios(const vector<string>& lines) {
+    vector<int> result;
+
+    // All occurrences of '*'
+    auto potential_locations = find_symbol_positions(lines, "\\*");
+
+    for (auto& location : potential_locations) {
+        // Only consider gears with exactly 2 adjacent numbers
+        int counter = 0;
+        std::array<int, 2> adjacent_numbers{0, 0};
+
+        auto surrounding_lines = {lines[location.line - 1], lines[location.line],
+                                  lines[location.line + 1]};
+
+        for (auto& line : surrounding_lines) {
+            auto numbers = number_matches(line);
+
+            for (auto& number_match : numbers) {
+                if (is_adjacent(number_match, location)) {
+                    if (counter < 2) {
+                        adjacent_numbers[counter] = std::stoi(number_match.str());
+                    }
+                    counter++;
+                }
+            }
+        }
+        result.push_back(adjacent_numbers[0] * adjacent_numbers[1]);
+    }
+
+    return result;
+}
+
 int main() {
     string filename = "data/input.txt";
 
-    int expected = 4361;
+    int expected = 467835;
     int result = 0;
 
     vector<string> lines = read_inputs(filename);
 
     auto part_numbers = find_part_numbers(lines);
-    for (auto& x : part_numbers) {
+    auto gear_ratios = calculate_gear_ratios(lines);
+
+    for (auto& x : gear_ratios) {
         result += x;
     }
 
