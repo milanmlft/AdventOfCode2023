@@ -1,20 +1,21 @@
-#include <cmath>
+#include <exception>
 #include <fstream>
 #include <iostream>
+#include <numeric>
 #include <sstream>
 #include <string>
 #include <unordered_set>
-
-#include "read_inputs.hpp"
+#include <vector>
 
 using std::cout;
 using std::endl;
 using std::string;
 using std::stringstream;
+using std::vector;
 
 void remove_prefix(string& line) { line.erase(0, line.find(":") + 1); }
 
-int calculate_points(string& line) {
+int n_matches(string& line) {
     remove_prefix(line);
 
     stringstream line_stream(line);
@@ -39,20 +40,37 @@ int calculate_points(string& line) {
         matches += scratched_set.count(n);
     }
 
-    if (matches == 0) return 0;
+    return matches;
+}
 
-    return std::pow(2, matches - 1);
+// Part 2
+int n_total_cards(std::ifstream& input) {
+    vector<int> card_copies{1};
+    string line;
+    int current_card = 0;
+    while (std::getline(input, line)) {
+        // Initialise if current card doesn't exist yet
+        if (current_card > card_copies.size() - 1) {
+            card_copies.push_back(1);
+        }
+
+        int n_matching_numbers = n_matches(line);
+        for (int i = 1; i <= n_matching_numbers; i++) {
+            int next_card = current_card + i;
+            // Initialise if entry doesn't exist yet
+            if (next_card > card_copies.size() - 1) {
+                card_copies.push_back(1);
+            }
+            card_copies.at(next_card) += card_copies.at(current_card);
+        }
+        current_card++;
+    }
+
+    // Sum up all elements in card_copies
+    return std::reduce(card_copies.begin(), card_copies.end());
 }
 
 int main() {
-    int result = 0;
-
-    auto lines = read_inputs("data/input.txt");
     std::ifstream infile("data/input.txt");
-    string line;
-    while (std::getline(infile, line)) {
-        result += calculate_points(line);
-    }
-
-    cout << "Result: " << result << endl;
+    cout << "Result: " << n_total_cards(infile) << endl;
 }
